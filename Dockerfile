@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 RUN apt-get update && \
-    apt-get -y install unzip bzip2
+    apt-get -y install unzip bzip2 gosu
 RUN mkdir -p /wineprefix64/drive_c/pwiz/skyline
 ADD pwiz-bin-windows-*.tar.bz2 /wineprefix64/drive_c/pwiz
 ADD SkylineTester.zip /
@@ -50,8 +50,6 @@ RUN groupadd -r galaxy -g 1450 && \
 RUN mkdir /data
 WORKDIR /data
 
-CMD ["wine64_anyuser", "msconvert" ]
-
 ## If you need a proxy during build, don't put it into the Dockerfile itself:
 ## docker build --build-arg http_proxy=http://proxy.example.com:3128/  -t repo/image:version .
 
@@ -62,3 +60,7 @@ RUN chmod ugo+rx /usr/bin/mywine
 # Sets the TEMP and TMP environment variables for the wine user to Z:\tmp
 # Z:\tmp in wine maps to /tmp on the host operating system in apptainer 
 RUN echo "\"TMP\"=\"Z:\\\\\\\\tmp\"" >> /wineprefix64/user.reg
+
+ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["wine64_anyuser", "msconvert"]
